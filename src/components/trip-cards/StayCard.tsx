@@ -2,33 +2,14 @@ import Image from "next/image";
 import Fill, { isEmpty } from "./Fill";
 import HeartButton from "./HeartButton";
 import { cardImages } from "./images";
+import { dateRange, hasNumber, money } from "./format";
 import type { StayDetails } from "./types";
 import styles from "./trip-cards.module.css";
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-function parse(iso: string) {
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return null;
-  return { y, m: m - 1, d, t: Date.UTC(y, m - 1, d) };
-}
-
-// Returns null when either date is missing or not a real date, so the card can show a filler.
-function formatRange(checkIn?: string | null, checkOut?: string | null) {
-  if (isEmpty(checkIn) || isEmpty(checkOut)) return null;
-  const a = parse(checkIn as string);
-  const b = parse(checkOut as string);
-  if (!a || !b) return null;
-  const nights = Math.round((b.t - a.t) / 86400000);
-  const start = a.m === b.m ? `${a.d}` : `${a.d} ${MONTHS[a.m]}`;
-  return { label: `${start}–${b.d} ${MONTHS[b.m]} ${b.y}`, nights };
-}
-
-export default function StayCard({ details }: { details: StayDetails }) {
-  const range = formatRange(details.checkIn, details.checkOut);
-  const price = details.nightlyPriceUsd;
-  const hasPrice = typeof price === "number" && !Number.isNaN(price);
+export default function StayCard({ details: d }: { details: StayDetails }) {
+  const range = dateRange(d.checkInDate, d.checkOutDate);
   const img = cardImages.stay;
+  const where = [d.propertyType, d.neighbourhood].filter((x) => !isEmpty(x));
 
   return (
     <article className={styles.stay} data-card="stay">
@@ -40,24 +21,44 @@ export default function StayCard({ details }: { details: StayDetails }) {
         <h3 className={styles.stayDates}>
           {range ? (
             <>
-              {range.label}
-              <span> · {range.nights} night{range.nights === 1 ? "" : "s"}</span>
+              {range}
+              {hasNumber(d.nights) && (
+                <span> · {d.nights} night{d.nights === 1 ? "" : "s"}</span>
+              )}
             </>
           ) : (
             <span className={styles.filler} data-filler="true">Dates to be confirmed</span>
           )}
         </h3>
-        <p className={styles.stayTitle}><Fill value={details.listingTitle} filler="Stay name coming soon" /></p>
-        <p><Fill value={details.destination} filler="Destination to be confirmed" /></p>
-        <p><Fill value={details.description} filler="Description coming soon" /></p>
-        <div className={styles.stayPrice}>
-          {hasPrice ? (
+        <p className={styles.stayTitle}><Fill value={d.listingTitle} filler="Stay name coming soon" /></p>
+        <p>
+          {where.length === 2 ? `${d.propertyType} in ${d.neighbourhood}` : (
+            <Fill value={where[0] as string | undefined} filler="Location to be confirmed" />
+          )}
+        </p>
+        <p><Fill value={d.highlight} filler="Highlights coming soon" /></p>
+        <p>
+          {hasNumber(d.guestRating) ? (
             <>
-              <b>${price} USD</b> night
-              {range && range.nights > 0 && (
-                <>
-                  {" "}· <span className={styles.underline}>${(price as number) * range.nights} total</span>
-                </>
+              <span className={styles.star}>★</span> {d.guestRating.toFixed(2)}
+              {hasNumber(d.reviewCount) && <> ({d.reviewCount})</>}
+            </>
+          ) : (
+            <span className={styles.filler} data-filler="true">No rating yet</span>
+          )}
+          {" · "}
+          {isEmpty(d.hostFirstName) ? (
+            <span className={styles.filler} data-filler="true">Host to be confirmed</span>
+          ) : (
+            <>Hosted by {d.hostFirstName}</>
+          )}
+        </p>
+        <div className={styles.stayPrice}>
+          {hasNumber(d.pricePerNightUsd) ? (
+            <>
+              <b>{money(d.pricePerNightUsd)} USD</b> night
+              {hasNumber(d.totalForTwoNightsUsd) && (
+                <> · <span className={styles.underline}>{money(d.totalForTwoNightsUsd)} total</span></>
               )}
             </>
           ) : (

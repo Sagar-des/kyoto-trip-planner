@@ -84,3 +84,20 @@
 .pill .filler { color: #6a6a6a; }
 .expTitle .filler { color: rgba(255, 255, 255, 0.8); }
 .dchip b { min-height: 1em; }
+
+/* Workbook-driven details */
+.star { color: var(--ink); }
+.sub { color: var(--mute); font-size: 14px; }
+.start { font-weight: 600; }
+.expFoot { border-top: 1px solid var(--line); margin: 0 16px; padding: 12px 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.expFoot p { margin: 0; }
+.expPriceRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; flex-wrap: wrap; }
+.expPriceRow b { font-weight: 700; color: var(--c-exp); }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.badge i { width: 8px; height: 8px; border-radius: 50%; }
+.dotOn { background: #1a8754; }
+.dotOff { background: #9a9a9a; }
+.foodThumb { align-self: start; height: 104px; min-height: 0; }
+.cost { font-size: 14px; font-weight: 500; letter-spacing: 0; color: var(--mute); }
+.small { margin-top: 6px !important; font-size: 13px !important; }
+.days { padding-bottom: 4px; }
